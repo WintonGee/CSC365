@@ -1,0 +1,458 @@
+-- Lab 5
+-- wgee01
+-- Nov 2, 2022
+
+USE `AIRLINES`;
+-- AIRLINES-1
+-- Find all airports with exactly 17 outgoing flights. Report airport code and the full name of the airport sorted in alphabetical order by the code.
+SELECT airports.Code, airports.Name
+FROM flights
+    JOIN airports 
+        ON airports.Code = flights.Source
+GROUP BY airports.Code, airports.Name
+HAVING COUNT(*) = 17
+ORDER BY airports.Code;
+
+
+USE `AIRLINES`;
+-- AIRLINES-2
+-- Find the number of airports from which airport ANP can be reached with exactly one transfer. Make sure to exclude ANP itself from the count. Report just the number.
+select COUNT(distinct f1.source)
+from flights f1, flights f2
+where f1.destination = f2.source and f2.destination = "ANP" and f1.source != "ANP";
+
+
+USE `AIRLINES`;
+-- AIRLINES-3
+-- Find the number of airports from which airport ATE can be reached with at most one transfer. Make sure to exclude ATE itself from the count. Report just the number.
+SELECT COUNT(DISTINCT f1.source)
+from flights f1, flights f2
+where (f1.destination = f2.source AND f2.destination = "ATE" AND f1.source != "ATE")
+    OR f1.destination = "ATE";
+
+
+USE `AIRLINES`;
+-- AIRLINES-4
+-- For each airline, report the total number of airports from which it has at least one outgoing flight. Report the full name of the airline and the number of airports computed. Report the results sorted by the number of airports in descending order. In case of tie, sort by airline name A-Z.
+SELECT 
+airlines.Name as name,
+COUNT(DISTINCT flights.Source) as Airports
+from airlines
+join flights on flights.Airline = airlines.Id
+group by airlines.Name
+order by Airports desc, airlines.Name;
+
+
+USE `BAKERY`;
+-- BAKERY-1
+-- For each flavor which is found in more than three types of items offered at the bakery, report the flavor, the average price (rounded to the nearest penny) of an item of this flavor, and the total number of different items of this flavor on the menu. Sort the output in ascending order by the average price.
+SELECT 
+Flavor,
+ROUND(AVG(PRICE),2) AS AveragePrice,
+Count(Flavor) AS DifferentPastries
+FrOM goods
+GROUP BY Flavor
+HAVING count(*) > 3
+ORDER BY AveragePrice;
+
+
+USE `BAKERY`;
+-- BAKERY-2
+-- Find the total amount of money the bakery earned in October 2007 from selling eclairs. Report just the amount.
+select 
+SUM(PRICE) as EclairRevenue 
+from receipts
+join items 
+    on Receipt = RNumber
+join goods 
+    on Item = GId
+where SaleDate between '2007-10-01' and '2007-10-31' and Food = 'Eclair';
+
+
+USE `BAKERY`;
+-- BAKERY-3
+-- For each visit by NATACHA STENZ output the receipt number, sale date, total number of items purchased, and amount paid, rounded to the nearest penny. Sort by the amount paid, greatest to least.
+select 
+RNumber,
+SaleDate,
+COUNT(SaleDate) as NumberOfItems,
+ROUND(SUM(PRICE),2) as CheckAmount 
+from customers
+join receipts 
+    on customers.CId = receipts.Customer
+join items 
+    on items.Receipt = receipts.RNumber
+join goods 
+    on items.Item = goods.GId
+where customers.FirstName = 'NATACHA' AND customers.LastName = 'STENZ'
+group by SaleDate, RNumber
+order by SUM(Price) desc;
+
+
+USE `BAKERY`;
+-- BAKERY-4
+-- For the week starting October 8, report the day of the week (Monday through Sunday), the date, total number of purchases (receipts), the total number of pastries purchased, and the overall daily revenue rounded to the nearest penny. Report results in chronological order.
+select DayName(SaleDate) as Day,
+SaleDate,
+COUNT(Distinct RNumber) as Receipts,
+COUNT(Customer) as Items,
+ROUND(Sum(PRICE),2) as Revenue
+from receipts
+join items 
+    on items.Receipt = receipts.RNumber
+join goods 
+    on items.Item = goods.GId
+where Month(SaleDate) = 10 and DayOfMonth(SaleDate) >= 8 and DayOfMonth(SaleDate) <= 14
+group by SaleDate
+order by SaleDate;
+
+
+USE `BAKERY`;
+-- BAKERY-5
+-- Report all dates on which more than ten tarts were purchased, sorted in chronological order.
+select SaleDate
+from receipts, items, goods
+where items.Receipt = receipts.RNumber AND items.Item = goods.GId AND Food = 'Tart'
+group by SaleDate
+having COUNT(*) > 10;
+
+
+USE `CSU`;
+-- CSU-1
+-- For each campus that averaged more than $2,500 in fees between the years 2000 and 2005 (inclusive), report the campus name and total of fees for this six year period. Sort in ascending order by fee.
+select
+campus,SUM(fee) as Total 
+from campuses, fees
+where campuses.Id = fees.CampusId and fees.Year >= 2000 and fees.Year <= 2005
+group by campus
+having SUM(fee) / COUNT(*) > 2500.0
+order by Total;
+
+
+USE `CSU`;
+-- CSU-2
+-- For each campus for which data exists for more than 60 years, report the campus name along with the average, minimum and maximum enrollment (over all years). Sort your output by average enrollment.
+select Campus,
+AVG(enrollments.Enrolled) as Average,
+MIN(enrollments.Enrolled) as Minimum,
+MAX(enrollments.Enrolled) as Maximum 
+from campuses
+join enrollments
+    on enrollments.CampusId = campuses.Id
+group by Campus
+having COUNT(enrollments.Year) > 60
+order by AVG(enrollments.Enrolled) asc;
+
+
+USE `CSU`;
+-- CSU-3
+-- For each campus in LA and Orange counties report the campus name and total number of degrees granted between 1998 and 2002 (inclusive). Sort the output in descending order by the number of degrees.
+
+select Campus,
+SUM(degrees) 
+from campuses, degrees
+where degrees.CampusId = campuses.Id 
+    and (County = 'Los Angeles' OR County = 'Orange') 
+    and (degrees.year >= 1998 and degrees.year <= 2002)
+group by Campus
+order by SUM(degrees) desc;
+
+
+USE `CSU`;
+-- CSU-4
+-- For each campus that had more than 20,000 enrolled students in 2004, report the campus name and the number of disciplines for which the campus had non-zero graduate enrollment. Sort the output in alphabetical order by the name of the campus. (Exclude campuses that had no graduate enrollment at all.)
+select campuses.Campus,
+COUNT(discEnr.Discipline) 
+from campuses, enrollments, discEnr
+where enrollments.CampusId = campuses.Id and discEnr.CampusId = campuses.Id 
+    and enrollments.year = 2004 and enrollments.Enrolled > 20000 and discEnr.Gr > 0
+group by campuses.Campus
+order by campuses.Campus;
+
+
+USE `INN`;
+-- INN-1
+-- For each room, report the full room name, total revenue (number of nights times per-night rate), and the average revenue per stay. In this summary, include only those stays that began in the months of September, October and November of calendar year 2010. Sort output in descending order by total revenue. Output full room names.
+SELECT 
+RoomName,
+Round(SUM(reservations.Rate * DateDiff(reservations.CheckOut, reservations.CheckIn)), 2) as TotalRevenue,
+Round(AVG(reservations.Rate * DateDiff(reservations.CheckOut, reservations.CheckIn)), 2) as AveragePerStay
+from reservations
+join rooms 
+    on rooms.RoomCode = reservations.Room
+where Month(reservations.CheckIn) >= 9 and Month(reservations.CheckIn) <= 11
+group by rooms.RoomName
+order by SUM(reservations.Rate * DateDiff(reservations.CheckOut, reservations.CheckIn)) desc;
+
+
+USE `INN`;
+-- INN-2
+-- Report the total number of reservations that began on Fridays, and the total revenue they brought in.
+select
+COUNT(*) as Stays,
+Round(SUM(reservations.Rate * DateDiff(reservations.CheckOut, reservations.CheckIn)), 2) as REVENUE
+from reservations
+where DayName(reservations.CheckIn) = 'Friday'
+group by DayName(reservations.CheckIn);
+
+
+USE `INN`;
+-- INN-3
+-- List each day of the week. For each day, compute the total number of reservations that began on that day, and the total revenue for these reservations. Report days of week as Monday, Tuesday, etc. Order days from Sunday to Saturday.
+SELECT
+DayName(CheckIn),
+COUNT(*) as Stays,
+SUM(reservations.Rate * DateDiff(reservations.CheckOut, reservations.CheckIn)) as REVENUE
+from reservations
+group by DayOfWeek(reservations.CheckIn), DayName(reservations.CheckIn)
+order by DayOfWeek(reservations.CheckIn);
+
+
+USE `INN`;
+-- INN-4
+-- For each room list full room name and report the highest markup against the base price and the largest markdown (discount). Report markups and markdowns as the signed difference between the base price and the rate. Sort output in descending order beginning with the largest markup. In case of identical markup/down sort by room name A-Z. Report full room names.
+select 
+roomname,
+MAX(reservations.Rate - rooms.BasePrice) as Markup,
+MIN(reservations.Rate - rooms.BasePrice) as Discount
+from reservations, rooms 
+where reservations.Room = rooms.RoomCode
+group by roomname
+order by MAX(reservations.Rate - rooms.BasePrice) desc, rooms.roomname;
+
+
+USE `INN`;
+-- INN-5
+-- For each room report how many nights in calendar year 2010 the room was occupied. Report the room code, the full name of the room, and the number of occupied nights. Sort in descending order by occupied nights. (Note: this should be number of nights during 2010. Some reservations extend beyond December 31, 2010. The ”extra” nights in 2011 must be deducted).
+select RoomCode, RoomName, sum(Days) as DaysOccupied
+from
+    (
+    select rooms.RoomCode, rooms.RoomName,
+    case
+        when Year(reservations.CheckOut) = 2010 and Year(reservations.CheckIn) = 2010 
+            then datediff(reservations.CheckOut, reservations.CheckIn)
+        when Year(reservations.CheckOut) = 2011 and Year(reservations.CheckIn) = 2010 
+            then datediff("2010-12-31", reservations.CheckIn)
+        when Year(reservations.CheckOut) = 2011 and Year(reservations.CheckIn) = 2009 
+            then 365
+    end as Days
+    from rooms
+    join reservations on reservations.Room = rooms.RoomCode
+    where (
+        Year(reservations.Checkout) >= 2010 
+        and Year(reservations.CheckIn) <= 2010) 
+        or (Year(reservations.Checkout) >= 2011 and Year(reservations.CheckIn) <= 2010)
+    ) as r1
+    
+group by RoomCode, RoomName
+order by DaysOccupied desc;
+
+
+USE `KATZENJAMMER`;
+-- KATZENJAMMER-1
+-- For each performer, report first name and how many times she sang lead vocals on a song. Sort output in descending order by the number of leads. In case of tie, sort by performer first name (A-Z.)
+select 
+Band.Firstname,
+COUNT(*) 
+from Vocals
+join Band 
+    on Vocals.Bandmate = Band.Id
+where Vocals.VocalType = 'lead'
+group by Vocals.Bandmate
+order by COUNT(*) desc;
+
+
+USE `KATZENJAMMER`;
+-- KATZENJAMMER-2
+-- Report how many different instruments each performer plays on songs from the album 'Le Pop'. Include performer's first name and the count of different instruments. Sort the output by the first name of the performers.
+SELECT Firstname,
+COUNT(DISTINCT Instrument) 
+from Albums
+join Tracklists 
+    on Tracklists.Album = Albums.AId
+join Songs 
+    on Songs.SongId = Tracklists.Song
+join Instruments 
+    on Songs.SongId = Instruments.Song
+join Band 
+    on Instruments.Bandmate = Band.Id
+where Albums.Title = 'Le Pop'
+group by Instruments.Bandmate
+order by Band.Firstname;
+
+
+USE `KATZENJAMMER`;
+-- KATZENJAMMER-3
+-- List each stage position along with the number of times Turid stood at each stage position when performing live. Sort output in ascending order of the number of times she performed in each position.
+
+select 
+Performance.StagePosition as TuridPosition,
+Count(*) 
+from Performance 
+join Band
+    on Band.Id = Performance.Bandmate 
+where Firstname = 'Turid'
+group by Performance.StagePosition
+order by COUNT(*) asc;
+
+
+USE `KATZENJAMMER`;
+-- KATZENJAMMER-4
+-- Report how many times each performer (other than Anne-Marit) played bass balalaika on the songs where Anne-Marit was positioned on the left side of the stage. List performer first name and a number for each performer. Sort output alphabetically by the name of the performer.
+
+select Firstname , count(*)
+from
+    (
+    select distinct Performance.Song as Song,Band.Firstname,Instrument
+    from Performance
+    join Instruments on  Instruments.Song = Performance.Song
+    join Band on Band.Id = Instruments.Bandmate
+    where Band.Firstname != 'Anne-Marit' and Instruments.Instrument = 'bass balalaika'
+    ) as t1
+    join
+    (
+    select Performance.Song as Song
+    from Performance
+    join Band on Band.Id = Performance.Bandmate
+    where Performance.StagePosition = 'left' and Band.Firstname  = 'Anne-Marit'
+    ) as t2
+    on t1.Song = t2.Song
+group by Firstname 
+order by Firstname;
+
+
+USE `KATZENJAMMER`;
+-- KATZENJAMMER-5
+-- Report all instruments (in alphabetical order) that were played by three or more people.
+select distinct Instrument 
+from Instruments
+group by Instrument
+having COUNT(distinct Bandmate) >= 3
+order by Instrument asc;
+
+
+USE `KATZENJAMMER`;
+-- KATZENJAMMER-6
+-- For each performer, list first name and report the number of songs on which they played more than one instrument. Sort output in alphabetical order by first name of the performer
+select 
+Firstname,
+COUNT(*) from Band
+join
+(select Bandmate from Instruments
+group by Bandmate, Song
+having COUNT(Instrument) > 1
+) t1
+on Band.Id = t1.Bandmate
+group by Id
+order by Firstname;
+
+
+USE `MARATHON`;
+-- MARATHON-1
+-- List each age group and gender. For each combination, report total number of runners, the overall place of the best runner and the overall place of the slowest runner. Output result sorted by age group and sorted by gender (F followed by M) within each age group.
+select 
+AgeGroup,
+Sex,
+COUNT(*) as Total,
+MIN(Place) as BestPlacing,
+MAX(Place) as SlowestPacing
+from marathon
+group by AgeGroup, Sex
+order by AgeGroup, Sex;
+
+
+USE `MARATHON`;
+-- MARATHON-2
+-- Report the total number of gender/age groups for which both the first and the second place runners (within the group) are from the same state.
+select count(*)
+from marathon m1, marathon m2
+where m1.state = m2.state 
+    and m1.Sex = m2.Sex 
+    and m1.AgeGroup = m2.AgeGroup 
+    and m1.Place != m2.Place 
+    and m1.GroupPlace = 1 and m2.GroupPlace = 2;
+
+
+USE `MARATHON`;
+-- MARATHON-3
+-- For each full minute, report the total number of runners whose pace was between that number of minutes and the next. In other words: how many runners ran the marathon at a pace between 5 and 6 mins, how many at a pace between 6 and 7 mins, and so on.
+select 
+Minute(pace) as PaceMinutes,
+Count(*)
+from marathon
+group by Minute(pace);
+
+
+USE `MARATHON`;
+-- MARATHON-4
+-- For each state with runners in the marathon, report the number of runners from the state who finished in top 10 in their gender-age group. If a state did not have runners in top 10, do not output information for that state. Report state code and the number of top 10 runners. Sort in descending order by the number of top 10 runners, then by state A-Z.
+select 
+State,
+COUNT(*) 
+from marathon
+where GroupPlace < 11
+group by State
+having COUNT(*) > 0
+order by COUNT(*) desc;
+
+
+USE `MARATHON`;
+-- MARATHON-5
+-- For each Connecticut town with 3 or more participants in the race, report the town name and average time of its runners in the race computed in seconds. Output the results sorted by the average time (lowest average time first).
+select 
+Town,
+ROUND(AVG(TIME_TO_SEC(RunTime)), 1)
+from marathon
+where State = 'CT'
+group by Town
+having count(*) >= 3
+order by ROUND(AVG(TIME_TO_SEC(RunTime)), 1);
+
+
+USE `STUDENTS`;
+-- STUDENTS-1
+-- Report the last and first names of teachers who have between seven and eight (inclusive) students in their classrooms. Sort output in alphabetical order by the teacher's last name.
+select distinct teachers.last, teachers.first 
+from teachers 
+join list 
+    on teachers.classroom = list.classroom
+group by teachers.last, teachers.first
+having COUNT(*) >= 7 AND COUNT(*) <= 8
+order by teachers.last;
+
+
+USE `STUDENTS`;
+-- STUDENTS-2
+-- For each grade, report the grade, the number of classrooms in which it is taught, and the total number of students in the grade. Sort the output by the number of classrooms in descending order, then by grade in ascending order.
+
+select 
+list.grade, 
+COUNT(distinct list.classroom) as Classrooms, 
+COUNT(*) as Students
+from list
+group by list.grade
+order by Classrooms desc, list.grade;
+
+
+USE `STUDENTS`;
+-- STUDENTS-3
+-- For each Kindergarten (grade 0) classroom, report classroom number along with the total number of students in the classroom. Sort output in the descending order by the number of students.
+select classroom, 
+COUNT(classroom) as Students 
+from list
+where grade = 0
+group by classroom
+order by Students DESC;
+
+
+USE `STUDENTS`;
+-- STUDENTS-4
+-- For each fourth grade classroom, report the classroom number and the last name of the student who appears last (alphabetically) on the class roster. Sort output by classroom.
+select classroom, 
+MAX(lastname) as LastOnRoster 
+from list
+where grade = 4
+group by classroom
+order by classroom;
+
+
