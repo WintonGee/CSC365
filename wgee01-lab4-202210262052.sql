@@ -1,0 +1,586 @@
+-- Lab 4
+-- wgee01
+-- Oct 26, 2022
+
+USE `STUDENTS`;
+-- STUDENTS-1
+-- Find all students who study in classroom 111. For each student list first and last name. Sort the output by the last name of the student.
+SELECT FirstName, LastName
+FROM list
+WHERE Classroom = 111
+ORDER BY LastName ASC;
+
+
+USE `STUDENTS`;
+-- STUDENTS-2
+-- For each classroom report the grade that is taught in it. Report just the classroom number and the grade number. Sort output by classroom in descending order.
+SELECT DISTINCT classroom, grade
+FROM list
+ORDER BY classroom DESC;
+
+
+USE `STUDENTS`;
+-- STUDENTS-3
+-- Find all teachers who teach fifth grade. Report first and last name of the teachers and the room number. Sort the output by room number.
+SELECT Distinct teachers.First, teachers.Last, teachers.Classroom
+FROM teachers
+JOIN list ON teachers.Classroom=list.Classroom AND list.Grade = 5;
+
+
+USE `STUDENTS`;
+-- STUDENTS-4
+-- Find all students taught by OTHA MOYER. Output first and last names of students sorted in alphabetical order by their last name.
+SELECT Distinct list.FirstName, list.LastName
+FROM list
+JOIN teachers ON 
+    teachers.Classroom=list.Classroom 
+    AND teachers.First = 'OTHA' AND teachers.Last = 'MOYER'
+ORDER BY LastName ASC;
+
+
+USE `STUDENTS`;
+-- STUDENTS-5
+-- For each teacher teaching grades K through 3, report the grade (s)he teaches. Output teacher last name, first name, and grade. Each name has to be reported exactly once. Sort the output by grade and alphabetically by teacher’s last name for each grade.
+SELECT DISTINCT Last, First, Grade
+FROM list natural join teachers
+WHERE Grade <= 3
+ORDER BY Grade, Last;
+
+
+USE `BAKERY`;
+-- BAKERY-1
+-- Find all chocolate-flavored items on the menu whose price is under $5.00. For each item output the flavor, the name (food type) of the item, and the price. Sort your output in descending order by price.
+SELECT DISTINCT Flavor, Food, Price
+FROM goods
+WHERE Price <= 5 AND Flavor = 'Chocolate'
+ORDER BY Price DESC;
+
+
+USE `BAKERY`;
+-- BAKERY-2
+-- Report the prices of the following items (a) any cookie priced above $1.10, (b) any lemon-flavored items, or (c) any apple-flavored item except for the pie. Output the flavor, the name (food type) and the price of each pastry. Sort the output in alphabetical order by the flavor and then pastry name.
+SELECT DISTINCT Flavor, Food, Price
+FROM goods
+WHERE Food = 'Cookie' AND Price >= 1.10
+    OR Flavor = 'Lemon'
+    OR Flavor = 'Apple' AND Food != 'Pie'
+ORDER BY Flavor, Food;
+
+
+USE `BAKERY`;
+-- BAKERY-3
+-- Find all customers who made a purchase on October 3, 2007. Report the name of the customer (last, first). Sort the output in alphabetical order by the customer’s last name. Each customer name must appear at most once.
+SELECT DISTINCT lastname, firstname
+FROM customers
+join receipts
+WHERE MONTH(SaleDate) = '10' AND DAY(SaleDate) = '3' AND YEAR(SaleDate) = '2007' 
+    AND Customer = CId
+ORDER BY lastname;
+
+
+USE `BAKERY`;
+-- BAKERY-4
+-- Find all different cakes purchased on October 4, 2007. Each cake (flavor, food) is to be listed once. Sort output in alphabetical order by the cake flavor.
+SELECT DISTINCT flavor, food
+FROM goods
+JOIN items
+  ON GId = Item AND food = 'Cake'
+JOIN receipts
+  ON Receipt = RNumber AND MONTH(SaleDate) = '10' AND DAY(SaleDate) = '4' AND YEAR(SaleDate) = '2007'
+ORDER BY flavor;
+
+
+USE `BAKERY`;
+-- BAKERY-5
+-- List all pastries purchased by ARIANE CRUZEN on October 25, 2007. For each pastry, specify its flavor and type, as well as the price. Output the pastries in the order in which they appear on the receipt (each pastry needs to appear the number of times it was purchased).
+SELECT DISTINCT flavor, food, price
+FROM customers
+JOIN receipts
+ON Customer = CId AND FirstName = 'ARIANE' AND LastName = 'CRUZEN' 
+    AND MONTH(SaleDate) = '10' AND DAY(SaleDate) = '25' AND YEAR(SaleDate) = '2007'
+JOIN items
+ON Receipt = RNumber
+JOIN goods
+on Item = GId;
+
+
+USE `BAKERY`;
+-- BAKERY-6
+-- Find all types of cookies purchased by KIP ARNN during the month of October of 2007. Report each cookie type (flavor, food type) exactly once in alphabetical order by flavor.
+
+SELECT DISTINCT flavor, food
+FROM customers
+JOIN receipts
+ON Customer = CId AND FirstName = 'KIP' AND LastName = 'ARNN' 
+    AND MONTH(SaleDate) = '10' AND YEAR(SaleDate) = '2007'
+JOIN items
+ON Receipt = RNumber
+JOIN goods
+on Item = GId AND food = 'Cookie'
+ORDER BY flavor;
+
+
+USE `CSU`;
+-- CSU-1
+-- Report all campuses from Los Angeles county. Output the full name of campus in alphabetical order.
+SELECT Campus
+FROM campuses
+WHERE County = 'Los Angeles'
+ORDER BY Campus ASC;
+
+
+USE `CSU`;
+-- CSU-2
+-- For each year between 1994 and 2000 (inclusive) report the number of students who graduated from California Maritime Academy Output the year and the number of degrees granted. Sort output by year.
+SELECT DISTINCT degrees.year, degrees
+FROM degrees
+JOIN campuses
+  ON CampusId = Id AND Campus = 'California Maritime Academy'
+  AND degrees.year >= 1994 AND degrees.year <= 2000
+ORDER BY degrees.year;
+
+
+USE `CSU`;
+-- CSU-3
+-- Report undergraduate and graduate enrollments (as two numbers) in ’Mathematics’, ’Engineering’ and ’Computer and Info. Sciences’ disciplines for both Polytechnic universities of the CSU system in 2004. Output the name of the campus, the discipline and the number of graduate and the number of undergraduate students enrolled. Sort output by campus name, and by discipline for each campus.
+SELECT DISTINCT campus, Name, gr, ug
+FROM discEnr
+JOIN campuses
+  ON CampusId = campuses.Id
+JOIN disciplines
+  ON Discipline = disciplines.Id 
+WHERE discEnr.year = 2004 AND (Campus = 'California Polytechnic State University-San Luis Obispo'
+  OR Campus = 'California State Polytechnic University-Pomona') AND (Name = 'Computer and Info. Sciences' OR Name = 'Engineering' OR Name = 'Mathematics')
+ORDER BY campus, Name;
+
+
+USE `CSU`;
+-- CSU-4
+-- Report graduate enrollments in 2004 in ’Agriculture’ and ’Biological Sciences’ for any university that offers graduate studies in both disciplines. Report one line per university (with the two grad. enrollment numbers in separate columns), sort universities in descending order by the number of ’Agriculture’ graduate students.
+SELECT DISTINCT Campus,
+d1.Gr AS Agriculture,
+d2.Gr as Biology
+FROM campuses
+JOIN discEnr d1
+    ON campuses.Id = d1.CampusId AND d1.year = '2004' AND d1.Ug > 0 AND d1.Gr > 0
+JOIN discEnr d2
+    ON campuses.Id = d2.CampusId AND d2.year = '2004' AND d2.Ug > 0 AND d2.Gr > 0
+JOIN disciplines agD
+    ON d1.Discipline = agD.Id
+JOIN disciplines bioD
+    ON d2.Discipline = bioD.Id
+WHERE agD.Name = 'Agriculture' AND bioD.Name = 'Biological Sciences'
+ORDER BY Agriculture desc;
+
+
+USE `CSU`;
+-- CSU-5
+-- Find all disciplines and campuses where graduate enrollment in 2004 was at least three times higher than undergraduate enrollment. Report campus names, discipline names, and both enrollment counts. Sort output by campus name, then by discipline name in alphabetical order.
+SELECT campuses.campus, disciplines.name, discEnr.ug, discEnr.gr
+FROM disciplines
+JOIN discEnr
+    ON discEnr.Discipline = disciplines.Id
+JOIN campuses 
+    ON discEnr.CampusId = campuses.Id
+WHERE (discEnr.gr / 3) > discEnr.ug AND discEnr.year = 2004
+ORDER BY campuses.campus, disciplines.name;
+
+
+USE `CSU`;
+-- CSU-6
+-- Report the amount of money collected from student fees (use the full-time equivalent enrollment for computations) at ’Fresno State University’ for each year between 2002 and 2004 inclusively, and the amount of money (rounded to the nearest penny) collected from student fees per each full-time equivalent faculty. Output the year, the two computed numbers sorted chronologically by year.
+SELECT 
+fees.year, 
+enrollments.FTE * fee AS COLLECTED, 
+ROUND((enrollments.FTE * fee) / faculty.FTE, 2) AS 'PER FACULTY' 
+FROM fees
+JOIN campuses 
+    ON fees.CampusId = campuses.Id
+JOIN faculty 
+    ON faculty.CampusId = campuses.Id AND faculty.year = fees.year
+JOIN enrollments 
+    ON enrollments.year = fees.year AND enrollments.CampusId = Id
+WHERE campuses.campus = 'Fresno State University' AND fees.year >= 2002 AND fees.year <= 2004;
+
+
+USE `CSU`;
+-- CSU-7
+-- Find all campuses where enrollment in 2003 (use the FTE numbers), was higher than the 2003 enrollment in ’San Jose State University’. Report the name of campus, the 2003 enrollment number, the number of faculty teaching that year, and the student-to-faculty ratio, rounded to one decimal place. Sort output in ascending order by student-to-faculty ratio.
+SELECT 
+campuses.Campus,
+enrollments.FTE,
+faculty.FTE,
+ROUND(enrollments.FTE / faculty.FTE, 1) AS RATIO
+FROM campuses
+JOIN enrollments
+    ON campuses.Id = enrollments.CampusId
+JOIN enrollments SJSU
+    ON SJSU.campusId = 19 -- TODO need to change this
+JOIN faculty
+    ON enrollments.campusId = faculty.CampusId AND enrollments.Year = faculty.Year
+WHERE enrollments.Year = 2003 AND enrollments.FTE > SJSU.FTE AND SJSU.Year = 2003
+ORDER BY RATIO;
+
+
+USE `INN`;
+-- INN-1
+-- Find all modern rooms with a base price below $160 and two beds. Report room code and full room name, in alphabetical order by the code.
+SELECT RoomCode, roomname
+FROM rooms
+WHERE basePrice <= 160 AND Beds = 2 AND decor = 'modern'
+ORDER BY RoomCode;
+
+
+USE `INN`;
+-- INN-2
+-- Find all July 2010 reservations (a.k.a., all reservations that both start AND end during July 2010) for the ’Convoke and sanguine’ room. For each reservation report the last name of the person who reserved it, checkin and checkout dates, the total number of people staying and the daily rate. Output reservations in chronological order.
+SELECT DISTINCT LastName, checkin, checkout, Adults + Kids AS Guests, Rate
+FROM rooms, reservations
+WHERE MONTH(CheckIn) = '7' AND MONTH(CheckOut) = '7' 
+AND YEAR(CheckIn) = '2010' AND YEAR(CheckOut) = '2010'
+AND RoomName = 'Convoke and sanguine' AND RoomCode = ROOM
+ORDER BY CheckIn;
+
+
+USE `INN`;
+-- INN-3
+-- Find all rooms occupied on February 6, 2010. Report full name of the room, the check-in and checkout dates of the reservation. Sort output in alphabetical order by room name.
+SELECT DISTINCT roomname, checkin, checkout
+FROM rooms, reservations
+WHERE '2010-2-06' BETWEEN checkin AND checkout AND RoomCode = ROOM
+    AND (DAY(checkout) > 6 OR YEAR(checkout) > 2010 OR MONTH(checkout) > 2)
+ORDER BY roomname;
+
+-- Do not include 2010-2-06;
+
+
+USE `INN`;
+-- INN-4
+-- For each stay by GRANT KNERIEN in the hotel, calculate the total amount of money, he paid. Report reservation code, room name (full), checkin and checkout dates, and the total stay cost. Sort output in chronological order by the day of arrival.
+
+SELECT DISTINCT code, roomname, checkin, checkout,
+(rate * DATEDIFF(checkout, checkin)) as PAID
+FROM rooms, reservations
+WHERE FirstName = 'GRANT' AND LastName = 'KNERIEN' AND rooms.RoomCode = reservations.Room
+ORDER BY checkin;
+
+
+USE `INN`;
+-- INN-5
+-- For each reservation that starts on December 31, 2010 report the room name, nightly rate, number of nights spent and the total amount of money paid. Sort output in descending order by the number of nights stayed.
+SELECT roomname, rate,
+DATEDIFF(checkout, checkin) as Nights,
+(rate*DATEDIFF(checkout, checkin)) as Money
+FROM rooms, reservations
+WHERE rooms.RoomCode = reservations.Room AND checkin = '2010-12-31'
+ORDER BY Nights DESC;
+
+
+USE `INN`;
+-- INN-6
+-- Report all reservations in rooms with double beds that contained four adults. For each reservation report its code, the room abbreviation, full name of the room, check-in and check out dates. Report reservations in chronological order, then sorted by the three-letter room code (in alphabetical order) for any reservations that began on the same day.
+SELECT code, room, roomname, checkin, checkout
+FROM rooms, reservations
+WHERE rooms.RoomCode = reservations.Room
+    AND rooms.bedType = 'Double' AND reservations.Adults = 4;
+
+
+USE `MARATHON`;
+-- MARATHON-1
+-- Report the overall place, running time, and pace of TEDDY BRASEL.
+SELECT place, runtime, pace
+FROM marathon
+WHERE FirstName = 'TEDDY' AND LastName = 'BRASEL';
+
+
+USE `MARATHON`;
+-- MARATHON-2
+-- Report names (first, last), overall place, running time, as well as place within gender-age group for all female runners from QUNICY, MA. Sort output by overall place in the race.
+SELECT FirstName, Lastname, place, runtime, groupplace
+FROM marathon
+WHERE Sex = 'F' AND Town = 'QUNICY' AND State = 'MA'
+ORDER BY place;
+
+
+USE `MARATHON`;
+-- MARATHON-3
+-- Find the results for all 34-year old female runners from Connecticut (CT). For each runner, output name (first, last), town and the running time. Sort by time.
+SELECT FirstName, Lastname, town, runtime
+FROM marathon
+WHERE Sex = 'F' AND Age = 34 AND State = 'CT'
+ORDER BY place;
+
+
+USE `MARATHON`;
+-- MARATHON-4
+-- Find all duplicate bibs in the race. Report just the bib numbers. Sort in ascending order of the bib number. Each duplicate bib number must be reported exactly once.
+SELECT DISTINCT m1.Bibnumber
+FROM marathon m1
+JOIN marathon m2 
+WHERE m1.bibnumber = m2.bibnumber AND m1.place != m2.place
+ORDER BY m1.BiBNumber;
+
+
+USE `MARATHON`;
+-- MARATHON-5
+-- List all runners who took first place and second place in their respective age/gender groups. List gender, age group, name (first, last) and age for both the winner and the runner up (in a single row). Include only age/gender groups with both a first and second place runner. Order the output by gender, then by age group.
+SELECT DISTINCT t1.sex,t1.agegroup,t1.firstname,t1.lastName,t1.age,t2.firstname,t2.lastname,t2.age
+FROM marathon t1, marathon t2
+WHERE t1.agegroup = t2.agegroup AND t1.sex = t2.sex AND t1.groupplace = 1 AND t2.groupplace = 2
+ORDER BY sex,ageGroup;
+
+
+USE `AIRLINES`;
+-- AIRLINES-1
+-- Find all airlines that have at least one flight out of AXX airport. Report the full name and the abbreviation of each airline. Report each name only once. Sort the airlines in alphabetical order.
+SELECT distinct airlines.name, abbr
+FROM airports, airlines, flights
+WHERE Code = 'AXX' AND Id = Airline AND Source = 'AXX'
+ORDER BY airlines.name;
+
+
+USE `AIRLINES`;
+-- AIRLINES-2
+-- Find all destinations served from the AXX airport by Northwest. Re- port flight number, airport code and the full name of the airport. Sort in ascending order by flight number.
+
+SELECT flights.flightno, flights.Destination AS Code, airports.Name 
+FROM flights 
+JOIN airlines 
+ON Airline = ID
+JOIN airports 
+ON airports.Code = Destination
+WHERE Source = 'AXX' AND airlines.Name = 'Northwest Airlines'
+ORDER BY flightno;
+
+
+USE `AIRLINES`;
+-- AIRLINES-3
+-- Find all *other* destinations that are accessible from AXX on only Northwest flights with exactly one change-over. Report pairs of flight numbers, airport codes for the final destinations, and full names of the airports sorted in alphabetical order by the airport code.
+SELECT DISTINCT
+flights1.FlightNo,
+flights2.FlightNo,
+flights2.Destination AS Code,
+airports2.name
+FROM airlines as airlines1,
+airlines as airlines2,
+airports as airports1,
+airports as airports2,
+flights as flights1,
+flights as flights2
+WHERE airlines1.Id = flights1.Airline
+AND flights1.Destination = airports1.code
+AND flights1.Source = 'AXX'
+AND airlines1.Abbr = 'Northwest'
+AND airlines2.Id = flights2.Airline
+AND flights2.Destination = airports2.code
+AND flights2.Source = flights1.Destination
+AND flights2.Destination != 'AXX'
+AND airlines2.Abbr = 'Northwest'
+ORDER BY Code;
+
+
+USE `AIRLINES`;
+-- AIRLINES-4
+-- Report all pairs of airports served by both Frontier and JetBlue. Each airport pair must be reported exactly once (if a pair X,Y is reported, then a pair Y,X is redundant and should not be reported).
+SELECT DISTINCT flights1.Source, flights2.Destination
+FROM 
+airlines AS airlines1,
+airports AS airports1,
+flights AS flights1,
+airlines AS airlines2,
+airports AS airports2,
+flights AS flights2
+WHERE airlines1.Id = flights1.Airline
+AND airlines1.Abbr = 'Frontier'
+AND airlines2.Id = flights2.Airline
+AND airlines2.Abbr = 'JetBlue'
+AND flights1.Destination = flights2.Destination
+AND flights1.Source = flights2.Source
+AND flights1.Source < flights2.Destination;
+
+
+USE `AIRLINES`;
+-- AIRLINES-5
+-- Find all airports served by ALL five of the airlines listed below: Delta, Frontier, USAir, UAL and Southwest. Report just the airport codes, sorted in alphabetical order.
+SELECT DISTINCT flights1.Source
+FROM
+airports as airports1,
+airlines as airlines1,
+airlines as airlines2,
+airlines as airlines3,
+airlines as airlines4,
+airlines as airlines5,
+flights as flights1,
+flights as flights2,
+flights as flights3,
+flights as flights4,
+flights as flights5
+WHERE airlines1.Id = flights1.Airline
+AND airlines2.Id = flights2.Airline
+AND airlines3.Id = flights3.Airline
+AND airlines4.Id = flights4.Airline
+AND airlines5.Id = flights5.Airline
+AND airlines1.Name = 'Frontier Airlines'
+AND airlines2.Name = 'Southwest Airlines'
+AND airlines3.Name = 'Delta Airlines'
+AND airlines4.Name = 'US Airways'
+AND airlines5.Name = 'United Airlines'
+AND flights1.Source = flights2.Source
+AND flights2.Source = flights3.Source
+AND flights3.Source = flights4.Source
+AND flights4.Source = flights5.Source
+ORDER BY flights1.Source;
+
+
+USE `AIRLINES`;
+-- AIRLINES-6
+-- Find all airports that are served by at least three Southwest flights. Report just the three-letter codes of the airports — each code exactly once, in alphabetical order.
+SELECT DISTINCT flights1.Source
+FROM
+airlines as airlines1,
+flights as flights1,
+flights as flights2,
+flights as flights3
+WHERE airlines1.Abbr = 'Southwest'
+AND flights1.Airline = airlines1.Id
+AND flights2.Airline = airlines1.Id
+AND flights3.Airline = airlines1.Id
+AND flights1.FlightNo != flights2.FlightNo
+AND flights1.FlightNo != flights3.FlightNo
+AND flights2.FlightNo != flights3.FlightNo
+AND flights1.Source = flights2.Source
+AND flights2.Source = flights3.Source
+ORDER BY flights1.Source;
+
+
+USE `KATZENJAMMER`;
+-- KATZENJAMMER-1
+-- Report, in order, the tracklist for ’Le Pop’. Output just the names of the songs in the order in which they occur on the album.
+SELECT Songs.Title
+FROM Albums 
+JOIN Tracklists
+    ON Albums.AId = Tracklists.Album
+JOIN Songs 
+    ON Tracklists.Song = Songs.SongId
+WHERE Albums.Title = 'Le Pop';
+
+
+USE `KATZENJAMMER`;
+-- KATZENJAMMER-2
+-- List the instruments each performer plays on ’Mother Superior’. Output the first name of each performer and the instrument, sort alphabetically by the first name.
+SELECT distinct Firstname, Instrument
+FROM Instruments, Songs, Band
+WHERE Songs.Title = 'Mother Superior'
+    AND Instruments.Song = Songs.SongId AND Instruments.Bandmate = Band.Id
+ORDER BY Firstname;
+
+
+USE `KATZENJAMMER`;
+-- KATZENJAMMER-3
+-- List all instruments played by Anne-Marit at least once during the performances. Report the instruments in alphabetical order (each instrument needs to be reported exactly once).
+SELECT DISTINCT Instruments.Instrument 
+FROM Performance
+JOIN Band 
+    ON Performance.Bandmate = Band.Id
+JOIN Songs 
+    ON Performance.Song = Songs.SongId
+Join Instruments 
+    ON Instruments.Song = SongId AND Instruments.Bandmate = Band.Id
+WHERE Firstname = 'Anne-Marit'
+ORDER BY Instrument;
+
+
+USE `KATZENJAMMER`;
+-- KATZENJAMMER-4
+-- Find all songs that featured ukalele playing (by any of the performers). Report song titles in alphabetical order.
+SELECT Songs.Title
+FROM Songs
+JOIN Instruments 
+    ON Instruments.Song = Songs.SongId
+WHERE Instruments.Instrument = 'ukalele'
+ORDER BY Songs.Title;
+
+
+USE `KATZENJAMMER`;
+-- KATZENJAMMER-5
+-- Find all instruments Turid ever played on the songs where she sang lead vocals. Report the names of instruments in alphabetical order (each instrument needs to be reported exactly once).
+SELECT Distinct Instruments.Instrument
+FROM Songs 
+JOIN Instruments 
+    ON Instruments.Song = Songs.SongId
+JOIN Band
+    ON Band.Id = Instruments.Bandmate
+JOIN Vocals 
+    ON Band.Id = Vocals.Bandmate AND Vocals.Song = Songs.SongId
+WHERE Band.Firstname = 'Turid' AND Vocals.VocalType = 'lead'
+ORDER BY Instruments.Instrument;
+
+
+USE `KATZENJAMMER`;
+-- KATZENJAMMER-6
+-- Find all songs where the lead vocalist is not positioned center stage. For each song, report the name, the name of the lead vocalist (first name) and her position on the stage. Output results in alphabetical order by the song, then name of band member. (Note: if a song had more than one lead vocalist, you may see multiple rows returned for that song. This is the expected behavior).
+SELECT Songs.Title, Band.Firstname, Performance.StagePosition
+FROM Songs
+JOIN Performance
+    ON Songs.SongId = Performance.Song
+JOIN Band
+    ON Band.Id = Performance.Bandmate
+JOIN Vocals
+    ON Vocals.Song = Songs.SongId AND Vocals.Bandmate = Band.Id
+WHERE Performance.StagePosition != 'center' AND Vocals.VocalType = 'lead'
+ORDER BY Songs.Title;
+
+
+USE `KATZENJAMMER`;
+-- KATZENJAMMER-7
+-- Find a song on which Anne-Marit played three different instruments. Report the name of the song. (The name of the song shall be reported exactly once)
+SELECT DISTINCT Songs.Title
+FROM Band
+JOIN Instruments i1
+    ON i1.Bandmate = Band.Id
+JOIN Instruments i2
+    ON i2.Bandmate = Band.Id
+JOIN Instruments i3
+    ON i3.Bandmate = Band.Id
+JOIN Songs
+    ON Songs.SongId = i1.Song
+WHERE Band.Firstname = 'Anne-Marit' 
+    AND i1.Song = i2.Song AND i2.Song = i3.Song
+    AND i1.Instrument != i2.Instrument
+    AND i1.Instrument != i3.Instrument
+    AND i2.Instrument != i3.Instrument
+ORDER BY Songs.Title;
+
+
+USE `KATZENJAMMER`;
+-- KATZENJAMMER-8
+-- Report the positioning of the band during ’A Bar In Amsterdam’. (just one record needs to be returned with four columns (right, center, back, left) containing the first names of the performers who were staged at the specific positions during the song).
+SELECT 
+b1.Firstname AS R,
+b2.Firstname AS C,
+b3.Firstname AS B,
+b4.Firstname AS L
+FROM Songs
+JOIN Performance p1
+    ON p1.Song = Songs.SongId
+JOIN Performance p2
+    ON p2.Song = Songs.SongId
+JOIN Performance p3
+    ON p3.Song = Songs.SongId
+JOIN Performance p4
+    ON p4.Song = Songs.SongId    
+JOIN Band b1
+    ON p1.Bandmate = b1.Id
+JOIN Band b2
+    ON p2.Bandmate = b2.Id
+JOIN Band b3
+    ON p3.Bandmate = b3.Id
+JOIN Band b4
+    ON p4.Bandmate = b4.Id
+WHERE Songs.Title = 'A Bar In Amsterdam'
+    AND p1.StagePosition = 'right'
+    AND p2.StagePosition = 'center'
+    AND p3.StagePosition = 'back'
+    AND p4.StagePosition = 'left';
+
+
