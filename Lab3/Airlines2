@@ -1,0 +1,24 @@
+ALTER TABLE airlines DROP COLUMN Partner;
+
+ALTER TABLE airlines ADD COLUMN
+  Partner VARCHAR(100) UNIQUE;  -- column definition
+
+update airlines set Partner = 'JetBlue' where Abbreviation = 'Southwest';
+update airlines set Partner = 'Southwest' where Abbreviation = 'JetBlue';
+
+-- Debug
+show triggers;
+
+drop trigger invalid_nonexistent_partnership;
+
+CREATE TRIGGER invalid_nonexistent_partnership BEFORE INSERT ON airlines
+FOR EACH ROW
+BEGIN
+  IF NEW.Partner is not null and  NOT EXISTS (SELECT * FROM airlines WHERE Abbreviation = NEW.Partner) then
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = "Non-existent airline to partner with!";
+  end if;
+end
+
+-- Debug
+SELECT * FROM airlines;

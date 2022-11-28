@@ -1,0 +1,1 @@
+DELETE FROM Vocals WHERE Bandmate != 1 or Type = 'lead';

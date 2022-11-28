@@ -1,0 +1,13 @@
+drop trigger prevent_weekend_meringues_and_vanilla;
+
+create trigger prevent_weekend_meringues_and_vanilla before INSERT on items
+for each row
+begin
+if
+EXISTS (SELECT * FROM goods WHERE NEW.Item = GId AND (Food = 'Meringue' OR Flavor = 'Almond'))
+AND EXISTS (SELECT * FROM receipts WHERE WEEKDAY(SaleDate) >= 5 AND NEW.Receipt = RNumber)
+  then
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = "No Meringue or Almonds on this day!";
+  end if;
+end;

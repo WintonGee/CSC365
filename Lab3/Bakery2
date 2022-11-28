@@ -1,0 +1,5 @@
+UPDATE goods
+SET
+    Price = Price * 1.15
+WHERE
+    Price < 5.95 AND (Flavor = 'Apricot' OR Flavor = 'Chocolate');

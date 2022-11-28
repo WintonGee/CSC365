@@ -1,0 +1,10 @@
+DROP TABLE IF EXISTS payments;
+
+CREATE TABLE payments (
+  Receipt int NOT NULL,
+  Amount DECIMAL(10,2) NOT NULL,
+  PaymentSettled DATETIME,
+  PaymentType varchar(100) NOT NULL,
+  UNIQUE(Receipt,Amount,PaymentSettled,PaymentType),
+  FOREIGN KEY (Receipt) REFERENCES receipts (RNumber)
+);

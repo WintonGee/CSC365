@@ -1,0 +1,54 @@
+DROP TABLE IF EXISTS tickets;
+DROP TABLE IF EXISTS survivals;
+DROP TABLE IF EXISTS passengers;
+
+CREATE TABLE passengers (
+  PassengerId int PRIMARY KEY,
+  LastName varchar(100),
+  FirstName varchar(100),
+  Age int
+);
+
+INSERT INTO passengers(PassengerId,LastName,FirstName, Age) VALUES (1,'Braund','Mr. Owen Harris',22);
+INSERT INTO passengers(PassengerId,LastName,FirstName, Age) VALUES (2,'Cumings','Mrs. John Bradley',38);
+INSERT INTO passengers(PassengerId,LastName,FirstName, Age) VALUES (3,'Heikkinen','Miss. Laina',26);
+INSERT INTO passengers(PassengerId,LastName,FirstName, Age) VALUES (4,'Futrelle','Mrs. Jacques Heath',35);
+INSERT INTO passengers(PassengerId,LastName,FirstName, Age) VALUES (5,'Allen','Mr. William Henry',35);
+INSERT INTO passengers(PassengerId,LastName,FirstName) VALUES (6,'Moran','Mr. James');
+INSERT INTO passengers(PassengerId,LastName,FirstName, Age) VALUES (7,'McCarthy','Mr. Timothy J',54);
+INSERT INTO passengers(PassengerId,LastName,FirstName, Age) VALUES (8,'Palsson','Master. Gosta Leonard',2);
+INSERT INTO passengers(PassengerId,LastName,FirstName, Age) VALUES (9,'Johnson','Mrs. Oscar W',27);
+INSERT INTO passengers(PassengerId,LastName,FirstName, Age) VALUES (10,'Nasser','Mrs. Nicholas',14);
+
+
+CREATE TABLE survivals (
+  Passenger int NOT NULL,
+  Survived int,
+  FOREIGN KEY (Passenger) REFERENCES passengers (PassengerId)
+);
+
+INSERT INTO survivals(Passenger,Survived) VALUES (1,0);
+INSERT INTO survivals(Passenger,Survived) VALUES (2,1);
+INSERT INTO survivals(Passenger,Survived) VALUES (3,1);
+INSERT INTO survivals(Passenger,Survived) VALUES (4,1);
+INSERT INTO survivals(Passenger,Survived) VALUES (5,0);
+INSERT INTO survivals(Passenger,Survived) VALUES (6,0);
+INSERT INTO survivals(Passenger,Survived) VALUES (7,0);
+INSERT INTO survivals(Passenger,Survived) VALUES (8,1);
+INSERT INTO survivals(Passenger,Survived) VALUES (9,1);
+INSERT INTO survivals(Passenger,Survived) VALUES (10,1);
+
+CREATE TABLE tickets (
+  Passenger int NOT NULL,
+  PClass int,
+  Cabin varchar(100),
+  Fare float,
+  FOREIGN KEY (Passenger) REFERENCES passengers (PassengerId)
+);
+
+INSERT INTO tickets(Passenger,PClass,Fare) VALUES (1,3,7.25);
+INSERT INTO tickets(Passenger,PClass,Cabin,Fare) VALUES (2,1,'C85',71.2833);
+INSERT INTO tickets(Passenger,PClass,Cabin,Fare) VALUES (3,3,null,7.925);
+INSERT INTO tickets(Passenger,PClass,Cabin,Fare) VALUES (4,1,'C123',53.1);
+INSERT INTO tickets(Passenger,PClass,Cabin,Fare) VALUES (5,3,null,8.05);
+

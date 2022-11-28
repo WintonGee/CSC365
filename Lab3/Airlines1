@@ -1,0 +1,10 @@
+drop trigger invalid_airports;
+
+CREATE TRIGGER invalid_airports BEFORE INSERT ON flights
+FOR EACH ROW
+BEGIN
+  if (NEW.SourceAirport = NEW.DestAirport) then
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = "Source and destination airports should not be the same!";
+  end if;
+end;

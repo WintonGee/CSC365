@@ -1,0 +1,2 @@
+update Instruments set Instrument = 'awesome bass balalaika' where Instrument = 'bass balalaika';
+update Instruments set Instrument = 'acoustic guitar' where Instrument = 'guitar';
