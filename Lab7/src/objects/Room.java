@@ -3,6 +3,7 @@ package objects;
 import java.math.BigDecimal;
 
 public class Room {
+
     /*
     RoomCode char(5) PRIMARY KEY,
     RoomName varchar(30) NOT NULL,
@@ -21,5 +22,21 @@ public class Room {
     int maxOcc;
     BigDecimal basePrice;
     String decor;
+
+    public Room(String newRoomCode, String newRoomName, int newBeds, String newBedType,
+                int newMaxOcc, BigDecimal newBasePrice, String newDecor) {
+        this.RoomCode = newRoomCode;
+        this.RoomName = newRoomName;
+        this.Beds = newBeds;
+        this.bedType = newBedType;
+        this.maxOcc = newMaxOcc;
+        this.basePrice = newBasePrice;
+        this.decor = newDecor;
+    }
+
+    public String toString() {
+        return RoomCode + ", " + RoomName + ", " + Beds + ", " + bedType + ", " +
+                maxOcc + ", " + basePrice + ", " + decor;
+    }
 
 }

@@ -27,6 +27,13 @@ public class FunctionalRequirements {
 
 
     // FR3: Reservation Change
+    // Steps -> system shall accept from the user reservation code and any of the following information:
+    // - First name
+    // - Last name
+    // - Begin date
+    // - End date
+    // - Number of children
+    // - Number of adults
 
 
     // FR4: Reservation Cancellation
