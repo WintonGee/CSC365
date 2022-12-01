@@ -3,105 +3,60 @@ import objects.Room;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class InnReservations {
 
     public static void main(String[] args) {
         try {
-            getDatabaseRooms().forEach(System.out::println);
+            Database.getReservations().forEach(System.out::println);
+            chooseTask();
         } catch (SQLException e) {
             System.err.println("SQLException: " + e.getMessage());
         } catch (Exception e2) {
             System.err.println("Exception: " + e2.getMessage());
         }
+    }
 
-        try {
-            Date.valueOf("2019-01-02");
-        } catch (Exception e) {
-            System.out.println("Date Conversion Error");
+    // Selects a task
+    public static void chooseTask() throws SQLException {
+
+        System.out.println("(1) Rooms and Rates");
+        System.out.println("(2) Reservations");
+        System.out.println("(3) Reservation Change");
+        System.out.println("(4) Reservation Cancellation");
+        System.out.println("(5) Detailed Reservation Information");
+        System.out.println("(6) Revenue");
+        System.out.println("Choose an option:");
+        Scanner scanner = new Scanner(System.in);
+        String option = scanner.nextLine();
+        if (!DataChecker.isValidInteger(option)) {
+            System.out.println("Invalid Integer");
+            return;
+        }
+        switch (Integer.parseInt(option)) {
+            case 1:
+                FunctionalRequirements.roomAndRates_1();
+                return;
+            case 2:
+                FunctionalRequirements.reservations_2();
+                return;
+            case 3:
+                FunctionalRequirements.reservationChange_3();
+                return;
+            case 4:
+                FunctionalRequirements.reservationCancellation_4();
+                return;
+            case 5:
+                FunctionalRequirements.detailedReservationInformation_5();
+                return;
+            case 6:
+                FunctionalRequirements.revenue_6();
+                return;
+            default:
+                System.out.println("Invalid Option Number");
         }
     }
 
-    // TODO on init get all the values of lab7_rooms and lab7_reservations
-    // - used for checking if a certain command is valid
-
-    // Test
-    private static void demo1() throws SQLException {
-        // Step 1: Establish connection to RDBMS
-        try (Connection conn = DriverManager.getConnection(
-                ConnectionData.JDBC_URL.s,
-                ConnectionData.DB_USER.s,
-                ConnectionData.DB_PASSWORD.s)) {
-            Statement statement = conn.createStatement();
-//            statement.execute("show tables");
-            ResultSet rs = statement.executeQuery("SELECT * FROM airlines");
-            while (rs.next()) {
-                String id = rs.getString("Id");
-                String airline = rs.getString("Airline");
-                String abbreviation = rs.getString("Abbreviation");
-                String country = rs.getString("Country");
-                System.out.println(id + ", " + airline + ", " + abbreviation + ", " + country);
-            }
-        }
-    }
-
-    private static void demo2() throws SQLException {
-        // Step 1: Establish connection to RDBMS
-        try (Connection conn = DriverManager.getConnection(
-                ConnectionData.JDBC_URL.s,
-                ConnectionData.DB_USER.s,
-                ConnectionData.DB_PASSWORD.s)) {
-            Statement statement = conn.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT * FROM lab7_rooms");
-            while (rs.next()) {
-                /*
-                RoomCode char(5) PRIMARY KEY,
-                RoomName varchar(30) NOT NULL,
-                Beds int(11) NOT NULL,
-                bedType varchar(8) NOT NULL,
-                maxOcc int(11) NOT NULL,
-                basePrice DECIMAL(6,2) NOT NULL,
-                decor varchar(20) NOT NULL,
-                UNIQUE (RoomName)
-                 */
-                String RoomCode = rs.getString("RoomCode");
-                String RoomName = rs.getString("RoomName");
-                String Beds = rs.getString("Beds");
-                String bedType = rs.getString("bedType");
-                String maxOcc = rs.getString("maxOcc");
-                String basePrice = rs.getString("basePrice");
-                String decor = rs.getString("decor");
-                System.out.println(RoomCode + ", " + RoomName + ", " + Beds + ", " + bedType + ", " +
-                        maxOcc + ", " + basePrice + ", " + decor);
-            }
-        }
-    }
-
-    // Return: An arraylist of Room values in the lab 7 database
-    public static ArrayList<Room> getDatabaseRooms() throws SQLException {
-        ArrayList<Room> list = new ArrayList<>();
-
-        try (Connection conn = DriverManager.getConnection(
-                ConnectionData.JDBC_URL.s,
-                ConnectionData.DB_USER.s,
-                ConnectionData.DB_PASSWORD.s)) {
-            Statement statement = conn.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT * FROM lab7_rooms");
-            while (rs.next()) {
-                String RoomCode = rs.getString("RoomCode");
-                String RoomName = rs.getString("RoomName");
-                String Beds = rs.getString("Beds");
-                String bedType = rs.getString("bedType");
-                String maxOcc = rs.getString("maxOcc");
-                String basePrice = rs.getString("basePrice");
-                String decor = rs.getString("decor");
-                Room newRoom = new Room(RoomCode, RoomName, Integer.parseInt(Beds),
-                        bedType, Integer.parseInt(maxOcc), new BigDecimal(basePrice), decor);
-                list.add(newRoom);
-            }
-        }
-
-        return list;
-    }
 
 }

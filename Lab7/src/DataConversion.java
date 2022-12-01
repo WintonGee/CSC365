@@ -1,3 +1,4 @@
+import java.math.BigDecimal;
 import java.sql.Date;
 
 // This class will be used for converting ANSI SQL Data Type to Java Type
@@ -6,6 +7,10 @@ public class DataConversion {
 
     public static Date toDate(String s) {
         return Date.valueOf(s);
+    }
+
+    public static BigDecimal toBigDecimal(String s) {
+        return new BigDecimal(s);
     }
 
 }

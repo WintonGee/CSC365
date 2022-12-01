@@ -18,22 +18,19 @@ public class Reservation {
     FOREIGN KEY (Room) REFERENCES lab7_rooms (RoomCode)
      */
 
-    int CODE;
+    public int CODE;
     String Room;
-    Date CheckIn;
-    Date Checkout;
+    public Date CheckIn, CheckOut;
     BigDecimal Rate;
-    String LastName;
-    String FirstName;
-    int Adults;
-    int Kids;
+    public String LastName, FirstName;
+    public int Adults, Kids;
 
     public Reservation(int newCode, String newRoom, Date newCheckIn, Date newCheckout, BigDecimal newRate,
                        String newLastName, String newFirstName, int newAdults, int newKids) {
         this.CODE = newCode;
         this.Room = newRoom;
         this.CheckIn = newCheckIn;
-        this.Checkout = newCheckout;
+        this.CheckOut = newCheckout;
         this.Rate = newRate;
         this.LastName = newLastName;
         this.FirstName = newFirstName;
@@ -43,7 +40,7 @@ public class Reservation {
 
 
     public String toString() {
-        return CODE + ", " + Room + ", " + CheckIn + ", " + Checkout + ", " +
+        return CODE + ", " + Room + ", " + CheckIn + ", " + CheckOut + ", " +
                 Rate + ", " + LastName + ", " + FirstName + ", " + Adults + ", " + Kids;
     }
 
