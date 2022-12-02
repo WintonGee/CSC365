@@ -8,13 +8,19 @@ import java.util.Scanner;
 public class InnReservations {
 
     public static void main(String[] args) {
-        try {
-            Database.getReservations().forEach(System.out::println);
-            chooseTask();
-        } catch (SQLException e) {
-            System.err.println("SQLException: " + e.getMessage());
-        } catch (Exception e2) {
-            System.err.println("Exception: " + e2.getMessage());
+        String shouldContinue = "Y";
+        Scanner scanner = new Scanner(System.in);
+        while (shouldContinue.equalsIgnoreCase("Y")) {
+            try {
+                // Database.getReservations().forEach(System.out::println);
+                chooseTask();
+            } catch (SQLException e) {
+                System.err.println("SQLException: " + e.getMessage());
+            } catch (Exception e2) {
+                System.err.println("Exception: " + e2.getMessage());
+            }
+            System.out.print("Another Task? (Y/N): ");
+            shouldContinue = scanner.nextLine();
         }
     }
 
@@ -34,6 +40,12 @@ public class InnReservations {
             System.out.println("Invalid Integer");
             return;
         }
+
+        if (option.length() == 0) {
+            System.out.println("No Option Selected");
+            return;
+        }
+
         switch (Integer.parseInt(option)) {
             case 1:
                 FunctionalRequirements.roomAndRates_1();

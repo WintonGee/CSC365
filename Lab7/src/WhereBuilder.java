@@ -18,5 +18,25 @@ public class WhereBuilder {
         this.conditions.add(condition);
     }
 
+    public void addCondition(String key, String value, boolean addQuotations) {
+        addCondition(key, value, addQuotations, "=");
+    }
+
+    public void addCondition(String key, String value, boolean addQuotations, String operator) {
+        String s = "";
+
+        s = s + key + " " + operator + " ";
+
+        if (addQuotations)
+            s = s + "'";
+
+        s = s + value;
+
+        if (addQuotations)
+            s = s + "'";
+
+        this.conditions.add(s);
+    }
+
 
 }

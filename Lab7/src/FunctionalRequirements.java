@@ -1,8 +1,13 @@
 import objects.Reservation;
+import objects.Room;
+import objects.RoomRevenue;
 
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class FunctionalRequirements {
 
@@ -35,13 +40,44 @@ public class FunctionalRequirements {
     // Output:
     // (Available) a numbered list of available rooms w/ booking by option number
     // (None) 5 possibilities should be chosen based on similarity to the desired reservation
+    // Confirmation Screen Output:
+    // - First name, last name
+    // - Room code, room name, bed type
+    // - Begin and end date of stay
+    // - Number of adults
+    // - Number of children
+    // - Total cost of stay, based on a sum of the following:
+    // - Number of weekdays multiplied by room base rate
+    // – Number of weekend days multiplied by 110% of the room base rate
     public static void reservations_2() {
+        Scanner scanner = new Scanner(System.in);
+        // First name
+        System.out.println("Enter First Name: ");
+        String firstName = scanner.nextLine();
+        if (firstName.length() == 0) {
+            System.out.println("No First Name Entered");
+            return;
+        }
 
+        // Last name
+        System.out.println("Enter Last Name: ");
+        String lastName = scanner.nextLine();
+        if (lastName.length() == 0) {
+            System.out.println("No Last Name Entered");
+            return;
+        }
+
+        // A room code to indicate the specific room desired (or “Any” to indicate no preference)
+        // A desired bed type (or “Any” to indicate no preference)
+        // Begin date of stay
+        // End date of stay
+        // Number of children
+        // Number of adults
     }
 
 
     // FR3: Reservation Change
-    // Status: Complete and tested
+    // Status: TODO make sure the date change does not conflict with another reservation in the system
     // Allow the user to provide a new value or to indicate “no change” for a given field
     // Steps -> system shall accept from the user reservation code and any of the following information:
     // - First name
@@ -207,17 +243,195 @@ public class FunctionalRequirements {
     }
 
 
-    // TODO
     // FR5: Detailed Reservation Information
-    public static void detailedReservationInformation_5() {
+    // Status: Complete and tested
+    // Steps -> system shall accept from the user any of the following:
+    // - First name
+    // - Last name
+    // - A range of dates
+    // - Room code
+    // - Reservation code
+    // Output: display a list of all matching reservations found in the database.
+    public static void detailedReservationInformation_5() throws SQLException {
+        WhereBuilder where = new WhereBuilder();
+        Scanner scanner = new Scanner(System.in);
+
+        // - First name
+        System.out.println("First Name (Blank if any): ");
+        String firstName = scanner.nextLine();
+        if (firstName.length() > 0) {
+            where.addCondition("FirstName", firstName, true, "LIKE");
+        }
+
+        // - Last name
+        System.out.println("Last Name (Blank if any): ");
+        String lastName = scanner.nextLine();
+        if (lastName.length() > 0) {
+            where.addCondition("LastName", lastName, true, "LIKE");
+        }
+
+        // - After a date
+        System.out.println("After Date (Blank if any): ");
+        String afterDate = scanner.nextLine();
+        if (afterDate.length() > 0) {
+            if (!DataChecker.isValidDate(afterDate)) {
+                System.out.println("Invalid After Date");
+                return;
+            }
+            where.addCondition("'" + afterDate + "' < CheckIn");
+            where.addCondition("'" + afterDate + "' < CheckOut");
+        }
+
+        // - Before a date
+        System.out.println("Before Date (Blank if any): ");
+        String beforeDate = scanner.nextLine();
+        if (beforeDate.length() > 0) {
+            if (!DataChecker.isValidDate(beforeDate)) {
+                System.out.println("Invalid Before Date");
+                return;
+            }
+            where.addCondition("'" + beforeDate + "' > CheckOut");
+            where.addCondition("'" + beforeDate + "' > CheckIn");
+        }
+
+        // - Room code
+        System.out.println("Room code (Blank if any): ");
+        String roomCode = scanner.nextLine();
+        if (roomCode.length() > 0) {
+            where.addCondition("Room", roomCode, true);
+        }
+
+        // - Reservation code
+        System.out.println("Reservation code (Blank if any): ");
+        String reservationCode = scanner.nextLine();
+        if (reservationCode.length() > 0) {
+            if (!DataChecker.isValidInteger(reservationCode)) {
+                System.out.println("Invalid Integer");
+                return;
+            }
+            where.addCondition("CODE = " + Integer.parseInt(reservationCode));
+        }
+
+        // Print
+        try (Connection conn = DriverManager.getConnection(
+                ConnectionData.JDBC_URL.s,
+                ConnectionData.DB_USER.s,
+                ConnectionData.DB_PASSWORD.s)) {
+
+            ArrayList<Room> rooms = Database.getRooms();
+
+            Statement statement = conn.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT * FROM " +
+                    Database.Table.LAB7_RESERVATIONS.s + where.build());
+            System.out.println("Debug: Attempting to print: " + "SELECT * FROM " +
+                    Database.Table.LAB7_RESERVATIONS.s + where.build());
+            while (rs.next()) {
+                String CODE = rs.getString("CODE");
+                String Room = rs.getString("Room");
+                String CheckIn = rs.getString("CheckIn");
+                String Checkout = rs.getString("Checkout");
+                String Rate = rs.getString("Rate");
+                String LastName = rs.getString("LastName");
+                String FirstName = rs.getString("FirstName");
+                String Adults = rs.getString("Adults");
+                String Kids = rs.getString("Kids");
+
+                Reservation reservation = new Reservation(Integer.parseInt(CODE), Room,
+                        DataConversion.toDate(CheckIn), DataConversion.toDate(Checkout),
+                        DataConversion.toBigDecimal(Rate),
+                        LastName, FirstName,
+                        Integer.parseInt(Adults), Integer.parseInt(Kids));
+
+                // Using Reservation.Room, get the full name of the room from Room.RoomCode
+                Optional<String> room = rooms.stream()
+                        .filter(c -> c.RoomCode.equals(Room))
+                        .map(c -> c.RoomName)
+                        .findFirst();
+
+                System.out.println(room.isEmpty() ? "" : room.get() + ", " + reservation);
+            }
+        }
 
     }
 
 
-
-    // TODO
     // FR6: Revenue
-    public static void revenue_6() {
+    // Status: Complete and tested
+    // Steps -> system shall provide a month-by-month overview of revenue for the current calendar year
+    // - Use SQL‘s CURRENT DATE to determine the current year
+    // - Use CheckOut date to determine the month and current year
+    // - Round to the nearest whole dollar
+    // - Each room: 13 Columns: 12 Columns - 1 per month ; 1 Column - Totals
+    public static void revenue_6() throws SQLException {
+        ArrayList<Reservation> reservations = getCurrentYearReservations();
 
+        // Loading room revenues
+        ArrayList<RoomRevenue> roomRevenues = new ArrayList<>();
+
+        // Init RoomRevenue objects for each Room - Distinct
+        for (Reservation reservation : reservations) {
+            String roomCode = reservation.Room;
+            boolean shouldInitRoom = roomRevenues.stream()
+                    .noneMatch(roomRev -> roomRev.isSameRoom(roomCode));
+            if (shouldInitRoom)
+                roomRevenues.add(new RoomRevenue(roomCode));
+        }
+
+        // Adding in revenues
+        reservations
+                .forEach(res -> {
+                    String roomCode = res.Room;
+                    int month = res.CheckOut.toLocalDate().getMonthValue();
+                    double revenue = res.getRevenue();
+
+                    roomRevenues.forEach(c -> {
+                        if (c.isSameRoom(roomCode))
+                            c.addMonthRevenue(month, revenue);
+                    });
+                });
+
+        roomRevenues.forEach(RoomRevenue::showInformation);
     }
+
+    // Get the reservations of the current year, used for functional requirement 6
+    public static ArrayList<Reservation> getCurrentYearReservations() throws SQLException {
+        ArrayList<Reservation> list = new ArrayList<>();
+
+        try (Connection conn = DriverManager.getConnection(
+                ConnectionData.JDBC_URL.s,
+                ConnectionData.DB_USER.s,
+                ConnectionData.DB_PASSWORD.s)) {
+
+            // Use SQL‘s CURRENT DATE to determine the current year
+            WhereBuilder whereBuilder = new WhereBuilder();
+            whereBuilder.addCondition("YEAR(CURRENT_DATE) = YEAR(CheckOut)");
+
+            Statement statement = conn.createStatement();
+            ResultSet rs = statement.executeQuery("SELECT * FROM " + Database.Table.LAB7_RESERVATIONS.s
+                    + whereBuilder.build());
+            while (rs.next()) {
+                String CODE = rs.getString("CODE");
+                String Room = rs.getString("Room");
+                String CheckIn = rs.getString("CheckIn");
+                String Checkout = rs.getString("Checkout");
+                String Rate = rs.getString("Rate");
+                String LastName = rs.getString("LastName");
+                String FirstName = rs.getString("FirstName");
+                String Adults = rs.getString("Adults");
+                String Kids = rs.getString("Kids");
+
+                Reservation reservation = new Reservation(Integer.parseInt(CODE), Room,
+                        DataConversion.toDate(CheckIn), DataConversion.toDate(Checkout),
+                        DataConversion.toBigDecimal(Rate),
+                        LastName, FirstName,
+                        Integer.parseInt(Adults), Integer.parseInt(Kids));
+
+                list.add(reservation);
+
+            }
+
+            return list;
+        }
+    }
+
 }

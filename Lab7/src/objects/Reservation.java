@@ -2,6 +2,8 @@ package objects;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 public class Reservation {
 
@@ -9,7 +11,7 @@ public class Reservation {
     CODE int(11) PRIMARY KEY,
     Room char(5) NOT NULL,
     CheckIn date NOT NULL,
-    Checkout date NOT NULL,
+    CheckOut date NOT NULL,
     Rate DECIMAL(6,2) NOT NULL,
     LastName varchar(15) NOT NULL,
     FirstName varchar(15) NOT NULL,
@@ -19,7 +21,7 @@ public class Reservation {
      */
 
     public int CODE;
-    String Room;
+    public String Room;
     public Date CheckIn, CheckOut;
     BigDecimal Rate;
     public String LastName, FirstName;
@@ -42,6 +44,17 @@ public class Reservation {
     public String toString() {
         return CODE + ", " + Room + ", " + CheckIn + ", " + CheckOut + ", " +
                 Rate + ", " + LastName + ", " + FirstName + ", " + Adults + ", " + Kids;
+    }
+
+    public long getDaysStayed() {
+        LocalDate dateBefore = LocalDate.parse(CheckIn.toString());
+        LocalDate dateAfter = LocalDate.parse(CheckOut.toString());
+
+        return ChronoUnit.DAYS.between(dateBefore, dateAfter) + 1;
+    }
+
+    public double getRevenue() {
+        return Rate.doubleValue() * (double) getDaysStayed();
     }
 
 

@@ -15,8 +15,8 @@ public class Room {
     UNIQUE (RoomName)
      */
 
-    String RoomCode;
-    String RoomName;
+    public String RoomCode;
+    public String RoomName;
     int Beds;
     String bedType;
     int maxOcc;
