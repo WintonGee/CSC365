@@ -1,7 +1,6 @@
 package objects;
 
 import java.util.HashMap;
-import java.util.Map;
 
 // This class is used for Functional Requirement 6, Used for storing the revenue in a month
 public class RoomRevenue {

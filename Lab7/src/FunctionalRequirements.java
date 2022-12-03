@@ -1,13 +1,10 @@
-import objects.Reservation;
 import objects.Room;
 import objects.RoomRevenue;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Optional;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 public class FunctionalRequirements {
 
@@ -15,11 +12,14 @@ public class FunctionalRequirements {
     // FR1: Rooms and Rates
     // Steps -> output a list of rooms to the user sorted by popularity, highest to lowest
     // - Room popularity score: number of days the room has been occupied during
-    //   the previous 180 days divided by 180 (round to two decimal places)
+    //      the previous 180 days divided by 180 (round to two decimal places)
     // - Next available check-in date
     // - Length in days and check out date of the most recent (completed) stay in the room
-    public static void roomAndRates_1() {
+    // List of rooms: Popularity score, next available check-in date, length of previous checkout date, previous checkout date
+    public static void roomAndRates_1() throws SQLException {
+        Database.getReservations().forEach(c -> {
 
+        });
     }
 
 
@@ -40,6 +40,7 @@ public class FunctionalRequirements {
     // Output:
     // (Available) a numbered list of available rooms w/ booking by option number
     // (None) 5 possibilities should be chosen based on similarity to the desired reservation
+    // Allow the user to cancel or confirm
     // Confirmation Screen Output:
     // - First name, last name
     // - Room code, room name, bed type
@@ -49,7 +50,7 @@ public class FunctionalRequirements {
     // - Total cost of stay, based on a sum of the following:
     // - Number of weekdays multiplied by room base rate
     // – Number of weekend days multiplied by 110% of the room base rate
-    public static void reservations_2() {
+    public static void reservations_2() throws SQLException {
         Scanner scanner = new Scanner(System.in);
         // First name
         System.out.println("Enter First Name: ");
@@ -68,11 +69,93 @@ public class FunctionalRequirements {
         }
 
         // A room code to indicate the specific room desired (or “Any” to indicate no preference)
+        System.out.println("Enter Room Code Of Desired Room (Blank if Any): ");
+        String desiredRoomCode = scanner.nextLine();
+        if (desiredRoomCode.length() > 0) {
+            // TODO desired room
+            return;
+        }
+
         // A desired bed type (or “Any” to indicate no preference)
+        System.out.println("Enter Type Of Desired Bed (Blank if Any): ");
+        String desiredBedType = scanner.nextLine();
+        if (desiredBedType.length() > 0) {
+            // TODO desired bed type
+            return;
+        }
+
         // Begin date of stay
+        System.out.println("Enter Begin Date Of Stay (yyyy-mm-dd): ");
+        String beginDate = scanner.nextLine();
+        if (beginDate.length() == 0) {
+            System.out.println("No Begin Date Entered");
+            return;
+        }
+
+        if (!DataChecker.isValidDate(beginDate)) {
+            System.out.println("Invalid Date Formatting");
+            return;
+        }
+
         // End date of stay
+        System.out.println("Enter End Date Of Stay (yyyy-mm-dd): ");
+        String endDate = scanner.nextLine();
+        if (endDate.length() == 0) {
+            System.out.println("No End Date Entered");
+            return;
+        }
+
+        if (!DataChecker.isValidDate(endDate)) {
+            System.out.println("Invalid Date Formatting");
+            return;
+        }
+
         // Number of children
+        System.out.println("Enter Number Of Children: ");
+        String numberOfChildren = scanner.nextLine();
+        if (!DataChecker.isValidInteger(numberOfChildren)) {
+            System.out.println("Invalid Entry: Integer needed");
+            return;
+        }
+
         // Number of adults
+        System.out.println("Enter Number Of Adults: ");
+        String numberOfAdults = scanner.nextLine();
+        if (!DataChecker.isValidInteger(numberOfAdults)) {
+            System.out.println("Invalid Entry: Integer needed");
+            return;
+        }
+
+        // TODO
+        // Allow the user to choose from a set of options
+        // - All the possible ones, or generate 5 similar ones if none possible
+        // - Output the option selections based on the index, make sure the index is not out of bound.
+        ReservationGenerator reservationGenerator = new ReservationGenerator(
+                firstName, lastName,
+                desiredRoomCode, desiredBedType
+        );
+
+        // TODO test
+        // Checking if request exceeds the maximum capacity
+        int occupationRequest = Integer.parseInt(numberOfChildren) + Integer.parseInt(numberOfAdults);
+        int maxOccupation = reservationGenerator.getMaxOccupation();
+        if (maxOccupation < occupationRequest) {
+            System.out.println("No room with enough space, Requested: " + occupationRequest + ", Max: " + maxOccupation);
+            return;
+        }
+
+        Reservation tempReservation = reservationGenerator.getReservation();
+
+        // Allow the user to cancel or confirm
+        System.out.println("Confirm Reservation (Y/N): ");
+        String confirmation = scanner.nextLine();
+        if (!confirmation.equalsIgnoreCase("Y")) {
+            System.out.println("Failed to confirm reservation");
+            return;
+        }
+
+        // Output of reservation confirmation
+        new ReservationConfirmation(tempReservation).showInformation();
     }
 
 
@@ -162,6 +245,8 @@ public class FunctionalRequirements {
             System.out.println("Invalid Date Range");
             return;
         }
+
+        // TODO Check if the date will conflict with any other reservations
 
         // - Number of children
         System.out.println("Change Number of children (Y/N): ");

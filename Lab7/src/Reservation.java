@@ -1,9 +1,12 @@
-package objects;
+import objects.Room;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Optional;
 
 public class Reservation {
 
@@ -23,7 +26,7 @@ public class Reservation {
     public int CODE;
     public String Room;
     public Date CheckIn, CheckOut;
-    BigDecimal Rate;
+    public BigDecimal Rate;
     public String LastName, FirstName;
     public int Adults, Kids;
 
@@ -56,6 +59,20 @@ public class Reservation {
     public double getRevenue() {
         return Rate.doubleValue() * (double) getDaysStayed();
     }
+
+    public String getRoomName() throws SQLException {
+
+        ArrayList<Room> rooms = Database.getRooms();
+
+        // Using Reservation.Room, get the full name of the room from Room.RoomCode
+        Optional<String> room = rooms.stream()
+                .filter(c -> c.RoomCode.equals(Room))
+                .map(c -> c.RoomName)
+                .findFirst();
+
+        return room.isEmpty() ? "" : room.get();
+    }
+
 
 
 }
