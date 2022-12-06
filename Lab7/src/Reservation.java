@@ -60,14 +60,14 @@ public class Reservation {
         return "INSERT INTO lab7_reservations " +
                 "(CODE, Room, CheckIn, Checkout, Rate, LastName, FirstName, Adults, Kids) " +
                 "VALUES (" +
-                CODE +
-                DataConversion.toSQLFormation(Room) +
-                DataConversion.toSQLFormation(CheckIn.toString()) +
-                DataConversion.toSQLFormation(CheckOut.toString()) +
-                Rate +
-                DataConversion.toSQLFormation(LastName) +
-                DataConversion.toSQLFormation(FirstName) +
-                Adults
+                CODE + "," +
+                DataConversion.toSQLFormation(Room) + "," +
+                DataConversion.toSQLFormation(CheckIn.toString()) + "," +
+                DataConversion.toSQLFormation(CheckOut.toString()) + "," +
+                Rate + "," +
+                DataConversion.toSQLFormation(LastName) + "," +
+                DataConversion.toSQLFormation(FirstName) + "," +
+                Adults + "," +
                 + Kids
                 + ")";
     }

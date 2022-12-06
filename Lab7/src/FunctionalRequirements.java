@@ -17,11 +17,60 @@ public class FunctionalRequirements {
     // - Length in days and check out date of the most recent (completed) stay in the room
     // List of rooms: Popularity score, next available check-in date, length of previous checkout date, previous checkout date
     public static void roomAndRates_1() throws SQLException {
-        Database.getReservations().forEach(c -> {
+        String s =
+        """
+        SELECT *,
+          (
+            SELECT ROUND((CheckOut - CheckIn) / 180, 2) as Days
+            FROM lab7_reservations
+            WHERE lab7_reservations.Room = room1.RoomCode
+              AND CheckIn > DATE_ADD(CURRENT_TIMESTAMP, INTERVAL -180 DAY)
+              AND CheckOut < CURRENT_TIMESTAMP
+          )  AS PopScore,
+          (
+            SELECT MIN(CheckOut)
+            FROM lab7_reservations
+            WHERE lab7_reservations.Room = room1.RoomCode
+              AND CheckOut < CURRENT_TIMESTAMP
+          ) AS nextAvailCheckIn,
+          (
+            SELECT MIN(CheckOut)
+            FROM lab7_reservations
+            WHERE lab7_reservations.Room = room1.RoomCode
+              AND CheckOut < CURRENT_TIMESTAMP
+          ) AS recentCheckOut,
+          (
+            SELECT MIN(CheckOut - CheckIn)
+            FROM lab7_reservations
+            WHERE lab7_reservations.Room = room1.RoomCode
+              AND CheckOut = recentCheckOut
+          ) AS recentStayLength
+        FROM lab7_rooms room1
+        ORDER BY PopScore DESC
+        """;
+        try (Connection conn = DriverManager.getConnection(
+                ConnectionData.JDBC_URL.s,
+                ConnectionData.DB_USER.s,
+                ConnectionData.DB_PASSWORD.s)) {
 
-        });
-        // For determining the previous 180 days,
-        // if CheckIn is more than 180 ago, use the time that is 180 days ago
+            Statement statement = conn.createStatement();
+            ResultSet rs = statement.executeQuery(s);
+
+            while (rs.next()) {
+                String roomCode = rs.getString("RoomCode");
+                String roomName = rs.getString("RoomName");
+                String popScore = rs.getString("PopScore");
+                String nextAvailCheckIn = rs.getString("nextAvailCheckIn");
+                String recentCheckOut = rs.getString("recentCheckOut");
+                String recentStayLength = rs.getString("recentStayLength");
+
+
+                System.out.println(roomCode + ", " + roomName + ", PopScore: " + popScore + ", Available Check In:" +
+                        nextAvailCheckIn + ", Recent Check Out:" + recentCheckOut + ", Recent Stay length:" + recentStayLength);
+            }
+
+        }
+
     }
 
 
@@ -75,7 +124,8 @@ public class FunctionalRequirements {
         String desiredRoomCode = scanner.nextLine();
         if (desiredRoomCode.length() > 0) {
             // TODO desired room
-            return;
+            // Return if the room code does not exist in the database
+//            return;
         }
 
         // A desired bed type (or “Any” to indicate no preference)
@@ -83,7 +133,8 @@ public class FunctionalRequirements {
         String desiredBedType = scanner.nextLine();
         if (desiredBedType.length() > 0) {
             // TODO desired bed type
-            return;
+            // Return if it is not a valid bed type
+//            return;
         }
 
         // Begin date of stay
@@ -153,7 +204,7 @@ public class FunctionalRequirements {
         }
 
         // TODO build method
-        Reservation tempReservation = reservationGenerator.getReservation();
+        Reservation tempReservation = reservationGenerator.getExactReservation();
 
         // Allow the user to cancel or confirm
         System.out.println("Confirm Reservation (Y/N): ");

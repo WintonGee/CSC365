@@ -1,7 +1,9 @@
 import objects.Room;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Random;
 
 // This class is used for functional requirement 2
 // Precondition: data provided in constructor will be valid to be formatted
@@ -38,7 +40,7 @@ public class ReservationGenerator {
             Statement statement = conn.createStatement();
             ResultSet rs = statement.executeQuery(
                     "SELECT MAX(maxOcc)" +
-                    " FROM " + Database.Table.LAB7_ROOMS.s);
+                            " FROM " + Database.Table.LAB7_ROOMS.s);
             if (rs.next()) {
                 String maxOcc = rs.getString(1);
 
@@ -48,8 +50,50 @@ public class ReservationGenerator {
         return 0;
     }
 
-    public Reservation getReservation() {
-        return null;
+    // Return: If the desired data is conflicting with anything
+    public boolean isConflictingData() {
+        // Room = 'HBB' AND
+        //    bedType = 'Queen' AND
+        //    1 <= maxOcc
+        WhereBuilder whereBuilder = new WhereBuilder();
+        if (desiredRoomCode != null)
+            whereBuilder.addCondition("Room", desiredRoomCode, true);
+        if (desiredBedType != null)
+            whereBuilder.addCondition("bedType", desiredBedType, true);
+
+        // TODO add in more where conditions
+
+        return false;
+    }
+
+
+    // Generate reservation based on the desired
+    public Reservation getExactReservation() {
+
+        /*
+        int newCode, String newRoom, Date newCheckIn, Date newCheckout, BigDecimal newRate,
+                       String newLastName, String newFirstName, int newAdults, int newKids
+         */
+
+        // Room rate
+
+        // Room Code: TODO make sure it is a valid one instead of a random one
+        Random rand = new Random(); //instance of random class
+
+        // generate random values from 0-9999999
+        int randomReservationCode = rand.nextInt(9999999);
+
+        return new Reservation(
+                randomReservationCode, // TODO generate lab7_reservations.CODE
+                desiredRoomCode,
+                checkInDate,
+                checkOutDate,
+                BigDecimal.valueOf(100), // TODO get rate
+                lastName,
+                firstName,
+                numberOfAdults,
+                numberOfChildren
+        );
     }
 
     public ArrayList<Reservation> getReservations() throws SQLException {
