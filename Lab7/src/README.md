@@ -1,5 +1,5 @@
 # CSC365 - Lab 7
-(a) the list of all members of the team: Winton Gee: wgee01
+(a) the list of all members of the team: Winton Gee
 <br/><br/>
 
 (b) any compilation/runtime instructions,
