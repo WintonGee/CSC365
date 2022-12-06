@@ -49,6 +49,29 @@ public class Reservation {
                 Rate + ", " + LastName + ", " + FirstName + ", " + Adults + ", " + Kids;
     }
 
+    /* Example
+    INSERT INTO lab7_reservations
+    (CODE, Room, CheckIn, Checkout, Rate, LastName, FirstName, Adults, Kids)
+    VALUES (10100, 'HBB', '2021-12-23', '2021-12-25', 100.00, 'LastName', 'Conrad', 1, 1)
+     */
+    // Return: The string used to insert this reservation into the sql database
+    // TODO test
+    public String getSqlInsertString() {
+        return "INSERT INTO lab7_reservations " +
+                "(CODE, Room, CheckIn, Checkout, Rate, LastName, FirstName, Adults, Kids) " +
+                "VALUES (" +
+                CODE +
+                DataConversion.toSQLFormation(Room) +
+                DataConversion.toSQLFormation(CheckIn.toString()) +
+                DataConversion.toSQLFormation(CheckOut.toString()) +
+                Rate +
+                DataConversion.toSQLFormation(LastName) +
+                DataConversion.toSQLFormation(FirstName) +
+                Adults
+                + Kids
+                + ")";
+    }
+
     public long getDaysStayed() {
         LocalDate dateBefore = LocalDate.parse(CheckIn.toString());
         LocalDate dateAfter = LocalDate.parse(CheckOut.toString());
@@ -72,7 +95,6 @@ public class Reservation {
 
         return room.isEmpty() ? "" : room.get();
     }
-
 
 
 }

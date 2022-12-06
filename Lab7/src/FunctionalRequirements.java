@@ -20,6 +20,8 @@ public class FunctionalRequirements {
         Database.getReservations().forEach(c -> {
 
         });
+        // For determining the previous 180 days,
+        // if CheckIn is more than 180 ago, use the time that is 180 days ago
     }
 
 
@@ -132,18 +134,25 @@ public class FunctionalRequirements {
         // - Output the option selections based on the index, make sure the index is not out of bound.
         ReservationGenerator reservationGenerator = new ReservationGenerator(
                 firstName, lastName,
-                desiredRoomCode, desiredBedType
+                desiredRoomCode, desiredBedType,
+                DataConversion.toDate(beginDate), DataConversion.toDate(endDate),
+                Integer.parseInt(numberOfChildren), Integer.parseInt(numberOfAdults)
         );
 
-        // TODO test
-        // Checking if request exceeds the maximum capacity
+        // Checking if request exceeds the maximum capacity and check if any persons are requested
         int occupationRequest = Integer.parseInt(numberOfChildren) + Integer.parseInt(numberOfAdults);
+        if (occupationRequest == 0) {
+            System.out.println("Reservation needs to contain at least one person!");
+            return;
+        }
+
         int maxOccupation = reservationGenerator.getMaxOccupation();
         if (maxOccupation < occupationRequest) {
             System.out.println("No room with enough space, Requested: " + occupationRequest + ", Max: " + maxOccupation);
             return;
         }
 
+        // TODO build method
         Reservation tempReservation = reservationGenerator.getReservation();
 
         // Allow the user to cancel or confirm
@@ -153,6 +162,8 @@ public class FunctionalRequirements {
             System.out.println("Failed to confirm reservation");
             return;
         }
+
+        Database.execute(tempReservation.getSqlInsertString());
 
         // Output of reservation confirmation
         new ReservationConfirmation(tempReservation).showInformation();

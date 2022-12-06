@@ -13,4 +13,10 @@ public class DataConversion {
         return new BigDecimal(s);
     }
 
+    // Return: String with the ' on both sides of the string
+    public static String toSQLFormation(String s) {
+       return "'" + s + "'";
+    }
+
+
 }

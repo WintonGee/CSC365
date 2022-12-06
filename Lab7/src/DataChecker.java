@@ -30,4 +30,6 @@ public class DataChecker {
                 && DataConversion.toDate(checkIn).compareTo(DataConversion.toDate(checkOut)) <= 0;
     }
 
+
+
 }

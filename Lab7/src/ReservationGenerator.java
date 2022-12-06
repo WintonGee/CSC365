@@ -4,24 +4,31 @@ import java.sql.*;
 import java.util.ArrayList;
 
 // This class is used for functional requirement 2
-// Precondition: add data provided will be valid
+// Precondition: data provided in constructor will be valid to be formatted
 public class ReservationGenerator {
 
     String firstName, lastName;
-    String desiredRoomCode, desiredBedType;
+    String desiredRoomCode, desiredBedType; // Could be blank, indicating any
+    Date checkInDate, checkOutDate;
+    int numberOfChildren, numberOfAdults;
 
     public ReservationGenerator(
             String newFirstName, String newLastName,
-            String newDesiredRoomCode, String newDesiredBedType) {
+            String newDesiredRoomCode, String newDesiredBedType,
+            Date newCheckInDate, Date newCheckOutDate,
+            int newNumberOfChildren, int newNumberOfAdults) {
         this.firstName = newFirstName;
         this.lastName = newLastName;
         this.desiredRoomCode = newDesiredRoomCode;
         this.desiredBedType = newDesiredBedType;
+        this.checkInDate = newCheckInDate;
+        this.checkOutDate = newCheckOutDate;
+        this.numberOfChildren = newNumberOfChildren;
+        this.numberOfAdults = newNumberOfAdults;
     }
 
 
-    // TODO test
-    // Send a sql query to get the max occupation
+    // Return: Max number of occupations allowed
     public int getMaxOccupation() throws SQLException {
         try (Connection conn = DriverManager.getConnection(
                 ConnectionData.JDBC_URL.s,
@@ -33,7 +40,8 @@ public class ReservationGenerator {
                     "SELECT MAX(maxOcc)" +
                     " FROM " + Database.Table.LAB7_ROOMS.s);
             if (rs.next()) {
-                String maxOcc = rs.getString("maxOcc");
+                String maxOcc = rs.getString(1);
+
                 return Integer.parseInt(maxOcc);
             }
         }

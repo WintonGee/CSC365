@@ -23,18 +23,6 @@ public class Database {
 
     }
 
-
-    public static ResultSet executeQuery(String query) throws SQLException {
-        System.out.println("Attempting to execute query: " + query);
-        try (Connection conn = DriverManager.getConnection(
-                ConnectionData.JDBC_URL.s,
-                ConnectionData.DB_USER.s,
-                ConnectionData.DB_PASSWORD.s)) {
-            Statement statement = conn.createStatement();
-            return statement.executeQuery(query);
-        }
-    }
-
     public static void execute(String query) throws SQLException {
         System.out.println("Attempting to execute query: " + query);
         try (Connection conn = DriverManager.getConnection(
